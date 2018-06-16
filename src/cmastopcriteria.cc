@@ -27,10 +27,7 @@
 #include "llogging.h"
 #include <limits>
 #include <iostream>
-
-#ifdef HAVE_DEBUG
 #include <chrono>
-#endif
 
 namespace libcmaes
 {
@@ -48,7 +45,8 @@ namespace libcmaes
                     {NOEFFECTCOOR,"[Partial Success] Mean remains constant in coordinates"},
                     {MAXFEVALS,"The maximum number of function evaluations allowed for optimization has been reached"},
                     {MAXITER,"The maximum number of iterations specified for optimization has been reached"},
-                    {FTARGET,"[Success] The objective function target value has been reached"}};
+                    {FTARGET,"[Success] The objective function target value has been reached"},
+                    {TIMEOUT,"[Success] Time out"}};
 
   // computes median of a vector.
   double median(std::vector<double> scores)
@@ -116,6 +114,20 @@ namespace libcmaes
 	return CONT;
       };
     _scriteria.insert(std::pair<int,StopCriteria<TGenoPheno> >(FTARGET,StopCriteria<TGenoPheno>(fTarget)));
+    StopCriteriaFunc<TGenoPheno> timeOut = [](const CMAParameters<TGenoPheno> &cmap, const CMASolutions &cmas)
+      {
+        const auto getSec = [](){
+          return static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count()) / 1000000000.0;
+        };
+	if (cmap._max_calc_time == -1.0)
+	  return CONT;
+	if (getSec() - cmap._start_time >= cmap._max_calc_time)
+	  {
+	    return TIMEOUT;
+	  }
+	else return CONT;
+      };
+    _scriteria.insert(std::pair<int,StopCriteria<TGenoPheno> >(TIMEOUT,StopCriteria<TGenoPheno>(timeOut)));
     StopCriteriaFunc<TGenoPheno> tolHistFun = [](const CMAParameters<TGenoPheno> &cmap, const CMASolutions &cmas)
       {
 	double threshold = std::max(cmap._ftolerance,1e-12);

@@ -285,6 +285,10 @@ namespace libcmaes
        * @param d dsigma
        */
       void set_tpa_dsigma(const double &d) { _dsigma = d; }
+
+      void set_max_calc_time(double seconds) { _max_calc_time = seconds; }
+
+      void set_current_time(double seconds) { _start_time = seconds; }
       
     private:
       int _mu; /**< number of candidate solutions used to update the distribution parameters. */
@@ -322,7 +326,10 @@ namespace libcmaes
       bool _elitist = false; /**< re-inject the best-ever seen solution. */
       bool _initial_elitist = false; /**< re-inject x0. */
       bool _initial_elitist_on_restart = false; /**< activate the restart from and re-injection of the best seen solution if not the final one. */
-      
+     
+      double _max_calc_time = -1;
+      double _start_time;
+ 
       // stopping criteria
       std::map<int,bool> _stoppingcrit; /**< control list of stopping criteria. */
     };
