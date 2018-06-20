@@ -67,6 +67,8 @@ check_include_file (sys/stat.h HAVE_SYS_STAT_H)
 #  include_directories (${EIGEN3_INCLUDE_DIRS})
 #endif()
 
+include_directories(${EIGEN_INCLUDE_DIR})
+
 # omp
 if (USE_OPENMP)
   find_package (OpenMP)
